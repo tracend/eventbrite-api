@@ -97,6 +97,8 @@ class Eventbrite_Query extends WP_Query {
 	public function get_posts() {
 		// Set up query variables.
 		$this->parse_query();
+		// force flag
+		$force = ( isset( $this->query_vars['force'] ) ) ? $this->query_vars['force'] : false;
 
 		// Restore `paged` if changed to `page` (in the case of index pagination).
 		if ( ! empty( $this->query_vars['page'] ) ) {
@@ -109,17 +111,17 @@ class Eventbrite_Query extends WP_Query {
 
 		// Determine which endpoint is needed. Do we want just a single event?
 		if ( ! empty( $this->query_vars['p'] ) ) {
-			$this->api_results = eventbrite()->get_event( $this->query_vars['p'] );
+			$this->api_results = eventbrite()->get_event( $this->query_vars['p'], $force );
 		}
 
 		// If private events are wanted, the user_owned_events endpoint must be used.
 		elseif ( isset( $this->query_vars['display_private'] ) && true === $this->query_vars['display_private'] ) {
-			$this->api_results = eventbrite()->get_user_owned_events( $params );
+			$this->api_results = eventbrite()->get_user_owned_events( $params, $force );
 		}
 
 		// It's a run-of-the-mill query (only the user's public live events), meaning event_search is best.
 		else {
-			$this->api_results = eventbrite()->do_event_search( $params );
+			$this->api_results = eventbrite()->do_event_search( $params, $force );
 		}
 
 		// Do any post-API query processing.
